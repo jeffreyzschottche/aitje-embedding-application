@@ -32,6 +32,12 @@ class AdminController extends Controller
             ], 503);
         }
 
+        if (password_get_info($adminPasswordHash)['algoName'] !== 'bcrypt') {
+            return response()->json([
+                'message' => 'Admin password hash is not configured correctly.',
+            ], 503);
+        }
+
         if (
             ! hash_equals(Str::lower($adminEmail), Str::lower($validated['email'])) ||
             ! Hash::check($validated['password'], $adminPasswordHash)
