@@ -6,10 +6,15 @@ RUN apt-get update \
     && apt-get install -y --no-install-recommends \
         git \
         unzip \
+        libfreetype6-dev \
+        libjpeg62-turbo-dev \
+        libpng-dev \
         libonig-dev \
         libxml2-dev \
         libzip-dev \
+    && docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install \
+        gd \
         mbstring \
         opcache \
         pdo_mysql \
