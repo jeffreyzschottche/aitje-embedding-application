@@ -5,7 +5,7 @@
       <div class="w-full max-w-md rounded-loci-lg border border-loci-gray-100 bg-loci-white p-8">
         <h1 class="mb-6 text-center text-3xl font-bold text-loci-black">Login</h1>
         <p class="mb-8 text-center text-sm text-loci-gray-500">
-          Meld je aan om toegang te krijgen tot de kennisbank.
+          Log in met het bedrijfsaccount dat door Aitje is aangemaakt.
         </p>
 
         <form @submit.prevent="handleLogin" class="space-y-4">
@@ -39,6 +39,10 @@
             </NuxtLink>
           </div>
 
+          <p v-if="loginAttemptWarning" class="rounded-loci border border-red-200 bg-red-50 p-3 text-sm font-semibold text-red-700">
+            {{ loginAttemptWarning }}
+          </p>
+
           <button
             type="submit"
             :disabled="loading"
@@ -49,10 +53,7 @@
         </form>
 
         <p class="mt-6 text-center text-sm text-loci-gray-500">
-          Nog geen account?
-          <NuxtLink to="/register" class="font-semibold text-loci-black hover:text-loci-yellow-hover">
-            Registreer hier
-          </NuxtLink>
+          Geen toegang? We hebben ook een mail gestuurd. Bekijk je mailbox en spammap om te controleren of je de uitnodiging misschien over het hoofd hebt gezien.
         </p>
       </div>
     </div>
@@ -76,9 +77,11 @@ const form = reactive({
 
 const error = ref('');
 const loading = ref(false);
+const loginAttemptWarning = ref('');
 
 async function handleLogin() {
   error.value = '';
+  loginAttemptWarning.value = '';
   loading.value = true;
 
   try {
@@ -91,8 +94,22 @@ async function handleLogin() {
     } else {
       error.value = err.message || 'Login mislukt';
     }
+
+    loginAttemptWarning.value = buildAttemptWarning(err.data?.meta);
   } finally {
     loading.value = false;
   }
+}
+
+function buildAttemptWarning(meta?: { attempts: number; max_attempts: number; remaining: number; retry_after_seconds?: number | null }) {
+  if (!meta || meta.attempts < 3) {
+    return '';
+  }
+
+  if (meta.remaining <= 0) {
+    return '5/5 gedaan. Probeer het na een uur weer.';
+  }
+
+  return `${meta.attempts}/${meta.max_attempts} gedaan, nog ${meta.remaining} ${meta.remaining === 1 ? 'poging' : 'pogingen'} over. Na 5 mislukte pogingen wordt inloggen voor een uur geblokkeerd.`;
 }
 </script>

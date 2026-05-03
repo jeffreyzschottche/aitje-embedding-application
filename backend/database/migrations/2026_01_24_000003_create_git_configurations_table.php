@@ -12,7 +12,7 @@ return new class extends Migration
             $table->id();
             $table->string('repo_url');
             $table->string('branch')->default('main');
-            $table->string('access_token');
+            $table->text('access_token');
             $table->timestamp('last_pushed_at')->nullable();
             $table->timestamps();
         });

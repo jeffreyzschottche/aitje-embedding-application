@@ -1,6 +1,8 @@
-# Nuxt + Laravel Sanctum Starter Kit
+# Aitje Embedding Application
 
-Een volledige starterkit met Laravel (Sanctum) backend en Nuxt 3 frontend. Inclusief registratie, login, email verificatie en wachtwoord reset flows.
+Laravel (Sanctum) backend en Nuxt 3 frontend voor het beheren, embedden en exporteren van kennisbankgegevens.
+
+Er is bewust geen publieke registratieflow. Aitje beheert klantaccounts via `/admin/cms`. Per bedrijf is er één bedrijfsaccount dat door meerdere mensen binnen hetzelfde bedrijf kan worden gebruikt.
 
 ## Project structuur
 
@@ -37,7 +39,23 @@ FRONTEND_URL=http://localhost:3000
 SANCTUM_STATEFUL_DOMAINS=localhost:3000
 DB_* (database instellingen)
 MAIL_* (Mailtrap of Mailhog)
+ADMIN_EMAIL / ADMIN_PASSWORD_HASH (login voor /admin/cms)
 ```
+
+Genereer de admin password hash lokaal met:
+
+```bash
+php -r "echo password_hash('jouw-wachtwoord', PASSWORD_BCRYPT);"
+```
+
+De admin kan via `/admin/cms`:
+
+- klantaccounts aanmaken;
+- GitHub repository, branch en access token per klant koppelen;
+- klantstatus en laatste sync zien;
+- tijdelijk als klant meekijken via "Bekijk als gebruiker".
+
+GitHub access tokens worden versleuteld in de database opgeslagen. Klanten kunnen hun GitHub-koppeling zien en syncen, maar niet zelf aanpassen.
 
 Handige artisan commando's:
 
@@ -71,7 +89,6 @@ Alle routes bevinden zich onder `/api/v1`.
 
 | Methode | Endpoint | Authenticatie | Beschrijving |
 | ------- | -------- | ------------- | ------------ |
-| POST    | `/register` | Nee | Registratie, retourneert token + user |
 | POST    | `/login` | Nee | Login |
 | POST    | `/forgot-password` | Nee | Verstuurt reset email |
 | POST    | `/reset-password` | Nee | Stelt nieuw wachtwoord in |
@@ -82,7 +99,6 @@ Alle routes bevinden zich onder `/api/v1`.
 
 ## Testing checklist
 
-- Registratie flow (inclusief verificatie mail)
 - Login / logout
 - Forgot + reset password
 - Resend verificatie vanuit dashboard

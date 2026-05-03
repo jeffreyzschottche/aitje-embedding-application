@@ -16,6 +16,7 @@ class GitConfiguration extends Model
     ];
 
     protected $casts = [
+        'access_token' => 'encrypted',
         'last_pushed_at' => 'datetime',
     ];
 

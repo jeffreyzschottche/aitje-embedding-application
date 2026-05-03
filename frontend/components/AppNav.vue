@@ -9,18 +9,23 @@
       </div>
 
       <!-- Navigation - centered -->
-      <div class="flex flex-1 items-center justify-center space-x-2">
-        <NuxtLink
-          v-for="link in primaryLinks"
-          :key="link.to"
-          :to="link.to"
-          class="rounded-full px-4 py-2 text-sm font-semibold transition-all"
-          :class="isActiveRoute(link.to)
-            ? 'bg-loci-yellow text-loci-black-deep'
-            : 'text-loci-black hover:bg-loci-yellow/10'"
-        >
-          {{ link.label }}
-        </NuxtLink>
+      <div class="flex min-w-0 flex-1 items-center justify-center space-x-2">
+        <template v-if="authStore.isLoggedIn">
+          <NuxtLink
+            v-for="link in primaryLinks"
+            :key="link.to"
+            :to="link.to"
+            class="rounded-full px-4 py-2 text-sm font-semibold transition-all"
+            :class="isActiveRoute(link.to)
+              ? 'bg-loci-yellow text-loci-black-deep'
+              : 'text-loci-black hover:bg-loci-yellow/10'"
+          >
+            {{ link.label }}
+          </NuxtLink>
+        </template>
+        <p v-else class="truncate px-2 text-center text-sm font-bold text-loci-black sm:text-xl">
+          Kennisbank Management
+        </p>
       </div>
 
       <!-- User info - right aligned -->
@@ -90,6 +95,13 @@
               <b class="text-loci-black">{{ authStore.user?.name || translate('onbekend', 'unknown') }}</b>
             </span>
             <button
+              v-if="authStore.adminImpersonating"
+              @click="returnToAdmin"
+              class="rounded-full bg-loci-yellow px-4 py-2 text-sm font-semibold text-loci-black-deep transition-all hover:bg-loci-yellow-hover"
+            >
+              {{ translate('Terug naar admin', 'Back to admin') }}
+            </button>
+            <button
               @click="handleLogout"
               class="rounded-full border border-loci-gray-200 bg-loci-white px-4 py-2 text-sm font-semibold text-loci-black transition-all hover:border-loci-yellow hover:bg-loci-yellow hover:text-loci-black-deep"
             >
@@ -128,16 +140,9 @@ const languageOptions: Array<{ code: LanguageCode; label: string; subLabel: stri
 ];
 
 const primaryLinks = computed(() => {
-  if (authStore.isLoggedIn) {
-    return [
-      { to: '/kennisbank', label: kennisbankLabel.value },
-      { to: '/account', label: accountLabel.value },
-    ];
-  }
-
   return [
-    { to: '/', label: translate('Login', 'Login') },
-    { to: '/register', label: translate('Registreren', 'Register') },
+    { to: '/kennisbank', label: kennisbankLabel.value },
+    { to: '/account', label: accountLabel.value },
   ];
 });
 
@@ -207,6 +212,11 @@ async function handleLogout() {
     authStore.logout();
     router.push('/');
   }
+}
+
+function returnToAdmin() {
+  authStore.logout();
+  router.push('/admin/cms');
 }
 </script>
 

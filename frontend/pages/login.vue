@@ -19,7 +19,7 @@
         </div>
 
         <div>
-          <label class="mb-1 block text-sm font-medium text-gray-700">Password</label>
+          <label class="mb-1 block text-sm font-medium text-gray-700">Wachtwoord</label>
           <input
             v-model="form.password"
             type="password"
@@ -30,24 +30,25 @@
 
         <div class="flex items-center justify-between">
           <NuxtLink to="/account/forgot-password" class="text-sm text-blue-600 hover:underline">
-            Forgot password?
+            Wachtwoord vergeten?
           </NuxtLink>
         </div>
+
+        <p v-if="loginAttemptWarning" class="rounded border border-red-200 bg-red-50 p-3 text-sm font-semibold text-red-700">
+          {{ loginAttemptWarning }}
+        </p>
 
         <button
           type="submit"
           :disabled="loading"
           class="w-full rounded bg-blue-600 py-2 text-white hover:bg-blue-700 disabled:opacity-50"
         >
-          {{ loading ? 'Logging in...' : 'Login' }}
+          {{ loading ? 'Aan het inloggen...' : 'Login' }}
         </button>
       </form>
 
       <p class="mt-4 text-center text-sm text-gray-600">
-        Don't have an account?
-        <NuxtLink to="/register" class="text-blue-600 hover:underline">
-          Register here
-        </NuxtLink>
+        Geen toegang? We hebben ook een mail gestuurd. Bekijk je mailbox en spammap om te controleren of je de uitnodiging misschien over het hoofd hebt gezien.
       </p>
     </div>
   </NuxtLayout>
@@ -70,9 +71,11 @@ const form = reactive({
 
 const error = ref('');
 const loading = ref(false);
+const loginAttemptWarning = ref('');
 
 async function handleLogin() {
   error.value = '';
+  loginAttemptWarning.value = '';
   loading.value = true;
 
   try {
@@ -85,8 +88,22 @@ async function handleLogin() {
     } else {
       error.value = err.message || 'Login failed';
     }
+
+    loginAttemptWarning.value = buildAttemptWarning(err.data?.meta);
   } finally {
     loading.value = false;
   }
+}
+
+function buildAttemptWarning(meta?: { attempts: number; max_attempts: number; remaining: number; retry_after_seconds?: number | null }) {
+  if (!meta || meta.attempts < 3) {
+    return '';
+  }
+
+  if (meta.remaining <= 0) {
+    return '5/5 gedaan. Probeer het na een uur weer.';
+  }
+
+  return `${meta.attempts}/${meta.max_attempts} gedaan, nog ${meta.remaining} ${meta.remaining === 1 ? 'poging' : 'pogingen'} over. Na 5 mislukte pogingen wordt inloggen voor een uur geblokkeerd.`;
 }
 </script>

@@ -10,12 +10,15 @@ export default defineNuxtConfig({
     },
   },
 
-  modules: ['@nuxtjs/tailwindcss', '@pinia/nuxt'],
+  css: ['~/assets/css/tailwind.css'],
 
-  tailwindcss: {
-    configPath: 'tailwind.config.ts',
-    cssPath: '~/assets/css/tailwind.css',
-    exposeConfig: true,
+  modules: ['@pinia/nuxt'],
+
+  postcss: {
+    plugins: {
+      tailwindcss: {},
+      autoprefixer: {},
+    },
   },
 
   runtimeConfig: {

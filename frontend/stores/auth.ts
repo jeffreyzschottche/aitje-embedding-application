@@ -2,15 +2,13 @@ import { defineStore } from 'pinia';
 import type { User } from '~/types/User';
 import type {
   LoginResponse,
-  RegisterResponse,
   MessageResponse,
-  ProfileResponse,
 } from '~/types/ApiResponse';
-import type { ProfileUpdatePayload, ChangePasswordPayload } from '~/types/Account';
 
 export const useAuthStore = defineStore('auth', () => {
   const token = ref<string | null>(null);
   const user = ref<User | null>(null);
+  const adminImpersonating = ref(false);
 
   const isLoggedIn = computed(() => !!token.value);
   const isPremium = computed(() => !!user.value?.premium);
@@ -24,12 +22,25 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
+  function setAdminImpersonation(isImpersonating: boolean) {
+    adminImpersonating.value = isImpersonating;
+    if (import.meta.client) {
+      if (isImpersonating) {
+        localStorage.setItem('admin_impersonating', '1');
+      } else {
+        localStorage.removeItem('admin_impersonating');
+      }
+    }
+  }
+
   function logout() {
     token.value = null;
     user.value = null;
+    adminImpersonating.value = false;
     if (import.meta.client) {
       localStorage.removeItem('auth_token');
       localStorage.removeItem('auth_user');
+      localStorage.removeItem('admin_impersonating');
     }
   }
 
@@ -41,29 +52,13 @@ export const useAuthStore = defineStore('auth', () => {
         token.value = storedToken;
         user.value = JSON.parse(storedUser);
       }
+      adminImpersonating.value = localStorage.getItem('admin_impersonating') === '1';
     }
   }
 
   async function login(email: string, password: string) {
     const api = useApi();
     const response = await api.post<LoginResponse>('/login', { email, password });
-    setSession(response.token, response.user);
-    return response.user;
-  }
-
-  async function register(
-    name: string,
-    email: string,
-    password: string,
-    password_confirmation: string
-  ) {
-    const api = useApi();
-    const response = await api.post<RegisterResponse>('/register', {
-      name,
-      email,
-      password,
-      password_confirmation,
-    });
     setSession(response.token, response.user);
     return response.user;
   }
@@ -93,39 +88,19 @@ export const useAuthStore = defineStore('auth', () => {
     return await api.post<MessageResponse>('/email/resend');
   }
 
-  async function updateProfile(data: ProfileUpdatePayload) {
-    const api = useApi();
-    const response = await api.patch<ProfileResponse>('/profile', data);
-    user.value = response.user;
-    if (import.meta.client) {
-      localStorage.setItem('auth_user', JSON.stringify(response.user));
-    }
-    return response;
-  }
-
-  async function changePassword(data: ChangePasswordPayload) {
-    const api = useApi();
-    return await api.patch<MessageResponse>('/password', {
-      current_password: data.current_password,
-      password: data.password,
-      password_confirmation: data.password_confirmation,
-    });
-  }
-
   return {
     token,
     user,
     isLoggedIn,
+    adminImpersonating,
     setSession,
+    setAdminImpersonation,
     logout,
     restore,
     login,
-    register,
     forgotPassword,
     resetPassword,
     resendVerification,
     isPremium,
-    updateProfile,
-    changePassword,
   };
 });

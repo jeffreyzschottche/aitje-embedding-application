@@ -7,164 +7,33 @@
             {{ translate('Mijn account', 'My Account') }}
           </h1>
           <p class="text-sm text-loci-gray-500">
-            {{ translate('Werk je profielgegevens bij en beheer je beveiliging.', 'Update your profile details and manage your security settings.') }}
+            {{ translate('Dit bedrijfsaccount wordt beheerd door Aitje.', 'This company account is managed by Aitje.') }}
           </p>
         </div>
 
-        <form @submit.prevent="handleProfileSave" class="space-y-4">
-          <div v-if="profileSuccess" class="rounded-loci border border-green-200 bg-green-50 p-3 text-sm text-green-700">
-            {{ profileSuccess }}
-          </div>
-          <div v-if="profileError" class="rounded-loci border border-red-200 bg-red-50 p-3 text-sm text-red-700">
-            {{ profileError }}
-          </div>
-
+        <div class="grid gap-4 md:grid-cols-2">
           <div>
             <label class="mb-1 block text-sm font-medium text-loci-black">
               {{ translate('Naam', 'Name') }}
             </label>
-            <input
-              v-model="profileForm.name"
-              type="text"
-              required
-              class="w-full rounded-loci border border-loci-gray-300 bg-loci-cream px-4 py-3 text-loci-black focus:border-loci-yellow focus:outline-none"
-            />
+            <div class="rounded-loci border border-loci-gray-200 bg-loci-cream px-4 py-3 text-loci-black">
+              {{ authStore.user?.name || translate('Onbekend', 'Unknown') }}
+            </div>
           </div>
 
           <div>
             <label class="mb-1 block text-sm font-medium text-loci-black">
               {{ translate('Email', 'Email') }}
             </label>
-            <input
-              v-model="profileForm.email"
-              type="email"
-              required
-              class="w-full rounded-loci border border-loci-gray-300 bg-loci-cream px-4 py-3 text-loci-black focus:border-loci-yellow focus:outline-none"
-            />
-            <p class="mt-1 text-xs text-loci-gray-500">
-              {{ translate('Bij het wijzigen van je email moet je deze opnieuw verifiëren via de knop hieronder.', 'Changing your email requires re-verification via the button below.') }}
-            </p>
-          </div>
-
-          <button
-            type="submit"
-            :disabled="profileSaving"
-            class="w-full rounded-loci-full bg-loci-yellow py-3 font-semibold text-loci-black-deep transition-all hover:bg-loci-yellow-hover disabled:bg-loci-yellow-light disabled:text-loci-gray-400"
-          >
-            {{ profileSaving ? translate('Opslaan...', 'Saving...') : translate('Wijzigingen opslaan', 'Save changes') }}
-          </button>
-        </form>
-      </section>
-
-      <section class="rounded-loci-lg border border-loci-gray-100 bg-loci-white p-6">
-        <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-          <div>
-            <p class="text-sm font-semibold text-loci-black">
-              {{ translate('Email verificatie', 'Email verification') }}
-            </p>
-            <p class="text-sm" :class="emailVerified ? 'text-green-600' : 'text-loci-yellow-hover'">
-              {{ emailVerified ? translate('Je email is geverifieerd', 'Your email is verified') : translate('Nog niet geverifieerd', 'Not verified yet') }}
-            </p>
-            <p class="mt-2 text-xs text-loci-gray-500">
-              {{ translate('Verificatie e-mails worden alleen vanaf hier opnieuw verstuurd. Klik op de link in de mail om de verificatie af te ronden.', 'Verification emails can only be resent from here. Click the link in the message to finish verification.') }}
-            </p>
-          </div>
-          <div class="w-full md:w-auto">
-            <button
-              type="button"
-              @click="handleResendVerification"
-              :disabled="resendLoading || emailVerified"
-              class="w-full rounded-full border border-loci-gray-200 bg-loci-white px-4 py-2 font-semibold text-loci-black transition-all hover:border-loci-yellow hover:bg-loci-yellow hover:text-loci-black-deep disabled:bg-loci-gray-50 disabled:text-loci-gray-400 md:w-auto"
-            >
-              {{ emailVerified ? translate('Alles up-to-date', 'All set') : resendLoading ? translate('Versturen...', 'Sending...') : translate('Verzend verificatie', 'Send verification') }}
-            </button>
+            <div class="rounded-loci border border-loci-gray-200 bg-loci-cream px-4 py-3 text-loci-black">
+              {{ authStore.user?.email || translate('Onbekend', 'Unknown') }}
+            </div>
           </div>
         </div>
-        <p v-if="resendMessage" class="mt-2 text-sm text-green-600">{{ resendMessage }}</p>
-        <p v-if="resendError" class="mt-2 text-sm text-red-600">{{ resendError }}</p>
-      </section>
 
-      <section class="rounded-loci-lg border border-loci-gray-100 bg-loci-white p-8">
-        <h2 class="mb-4 text-xl font-semibold text-loci-black">
-          {{ translate('Wachtwoord wijzigen', 'Change password') }}
-        </h2>
-        <form @submit.prevent="handlePasswordChange" class="space-y-4">
-          <div v-if="passwordSuccess" class="rounded-loci border border-green-200 bg-green-50 p-3 text-sm text-green-700">
-            {{ passwordSuccess }}
-          </div>
-          <div v-if="passwordError" class="rounded-loci border border-red-200 bg-red-50 p-3 text-sm text-red-700">
-            {{ passwordError }}
-          </div>
-
-          <div>
-            <label class="mb-1 block text-sm font-medium text-loci-black">
-              {{ translate('Huidig wachtwoord', 'Current password') }}
-            </label>
-            <input
-              v-model="passwordForm.current_password"
-              type="password"
-              required
-              class="w-full rounded-loci border border-loci-gray-300 bg-loci-cream px-4 py-3 text-loci-black focus:border-loci-yellow focus:outline-none"
-            />
-          </div>
-
-          <div>
-            <label class="mb-1 block text-sm font-medium text-loci-black">
-              {{ translate('Nieuw wachtwoord', 'New password') }}
-            </label>
-            <input
-              v-model="passwordForm.password"
-              type="password"
-              required
-              class="w-full rounded-loci border border-loci-gray-300 bg-loci-cream px-4 py-3 text-loci-black focus:border-loci-yellow focus:outline-none"
-            />
-          </div>
-
-          <div>
-            <label class="mb-1 block text-sm font-medium text-loci-black">
-              {{ translate('Bevestig wachtwoord', 'Confirm password') }}
-            </label>
-            <input
-              v-model="passwordForm.password_confirmation"
-              type="password"
-              required
-              class="w-full rounded-loci border border-loci-gray-300 bg-loci-cream px-4 py-3 text-loci-black focus:border-loci-yellow focus:outline-none"
-            />
-          </div>
-
-          <button
-            type="submit"
-            :disabled="passwordSaving"
-            class="w-full rounded-loci-full bg-loci-black py-3 font-semibold text-loci-white transition-all hover:bg-loci-black-deep disabled:bg-loci-gray-400 disabled:text-loci-gray-200"
-          >
-            {{ passwordSaving ? translate('Bijwerken...', 'Updating...') : translate('Wachtwoord wijzigen', 'Update password') }}
-          </button>
-        </form>
-      </section>
-
-      <section class="rounded-loci-lg border border-loci-gray-100 bg-loci-white p-6">
-        <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-          <div>
-            <h3 class="text-lg font-semibold text-loci-black">
-              {{ translate('Wachtwoord vergeten', 'Forgot password') }}
-            </h3>
-            <p class="text-sm text-loci-gray-500">
-              {{ translate('Verstuur een resetlink naar je huidige emailadres. Deze link verloopt binnen 60 minuten.', 'Send a reset link to your current email address. The link expires after 60 minutes.') }}
-            </p>
-          </div>
-          <div class="w-full md:w-auto">
-            <button
-              type="button"
-              @click="handleForgotPassword"
-              :disabled="forgotSending"
-              class="w-full rounded-full border border-loci-gray-200 bg-loci-white px-4 py-2 font-semibold text-loci-black transition-all hover:border-loci-yellow hover:bg-loci-yellow hover:text-loci-black-deep disabled:bg-loci-gray-50 disabled:text-loci-gray-400 md:w-auto"
-            >
-              {{ forgotSending ? translate('Wordt verstuurd...', 'Sending...') : translate('Stuur resetlink', 'Send reset link') }}
-            </button>
-          </div>
-        </div>
-        <p v-if="forgotMessage" class="mt-2 text-sm text-green-600">{{ forgotMessage }}</p>
-        <p v-if="forgotError" class="mt-2 text-sm text-red-600">{{ forgotError }}</p>
+        <p class="mt-4 text-sm text-loci-gray-500">
+          {{ translate('Neem contact op met Aitje om accountgegevens of toegang te wijzigen.', 'Contact Aitje to change account details or access.') }}
+        </p>
       </section>
 
       <!-- Git Configuration -->
@@ -175,7 +44,9 @@
               {{ translate('Git Configuratie', 'Git configuration') }}
             </h2>
             <p class="text-sm text-loci-gray-500">
-              {{ translate('Stel de GitHub repo in voor de Sync to OS actie.', 'Configure the GitHub repo for the Sync to OS action.') }}
+              {{ authStore.adminImpersonating
+                ? translate('Je bekijkt deze koppeling als admin.', 'You are viewing this connection as admin.')
+                : translate('Deze koppeling wordt beheerd door Aitje.', 'This connection is managed by Aitje.') }}
             </p>
           </div>
           <div class="text-sm text-loci-gray-500 mt-2 md:mt-0">
@@ -204,11 +75,15 @@
               {{ translate('Repository URL', 'Repository URL') }}
             </label>
             <input
+              v-if="authStore.adminImpersonating"
               v-model="gitConfig.repo_url"
               type="text"
               class="mt-1 block w-full rounded-loci border border-loci-gray-300 bg-loci-cream px-4 py-3 text-loci-black focus:border-loci-yellow focus:outline-none"
               placeholder="https://github.com/naam/kennisbank.git"
             >
+            <div v-else class="mt-1 rounded-loci border border-loci-gray-200 bg-loci-cream px-4 py-3 text-loci-black">
+              {{ gitConfig.repo_url || translate('Nog niet gekoppeld', 'Not connected yet') }}
+            </div>
           </div>
 
           <div>
@@ -216,11 +91,15 @@
               {{ translate('Branch', 'Branch') }}
             </label>
             <input
+              v-if="authStore.adminImpersonating"
               v-model="gitConfig.branch"
               type="text"
               class="mt-1 block w-full rounded-loci border border-loci-gray-300 bg-loci-cream px-4 py-3 text-loci-black focus:border-loci-yellow focus:outline-none"
               placeholder="main"
             >
+            <div v-else class="mt-1 rounded-loci border border-loci-gray-200 bg-loci-cream px-4 py-3 text-loci-black">
+              {{ gitConfig.branch || 'main' }}
+            </div>
           </div>
 
           <div class="md:col-span-2">
@@ -228,25 +107,31 @@
               {{ translate('Access Token', 'Access token') }}
             </label>
             <input
+              v-if="authStore.adminImpersonating"
               v-model="gitConfig.access_token"
               type="password"
               class="mt-1 block w-full rounded-loci border border-loci-gray-300 bg-loci-cream px-4 py-3 text-loci-black focus:border-loci-yellow focus:outline-none"
-              placeholder="ghp_xxxxxxxxx"
+              :placeholder="gitConfig.has_access_token ? translate('Laat leeg om bestaande token te behouden', 'Leave empty to keep existing token') : 'ghp_xxxxxxxxx'"
             >
-            <p class="text-xs text-loci-gray-500 mt-1">
-              {{ translate('Personal Access Token met repo permissions. Wordt versleuteld opgeslagen.', 'Personal Access Token with repo permissions. Stored encrypted.') }}
-            </p>
+            <div
+              v-else
+              class="mt-1 rounded-loci border px-4 py-3"
+              :class="gitConfig.has_access_token ? 'border-green-200 bg-green-50 text-green-700' : 'border-red-200 bg-red-50 text-red-700'"
+            >
+              {{ gitConfig.has_access_token ? translate('Gekoppeld', 'Connected') : translate('Niet gekoppeld', 'Not connected') }}
+            </div>
           </div>
         </div>
 
         <div class="flex flex-col sm:flex-row justify-end gap-3 mt-6">
           <button
+            v-if="authStore.adminImpersonating"
             type="button"
             class="px-6 py-3 bg-loci-black text-loci-white rounded-loci-full font-semibold hover:bg-loci-black-deep transition-all disabled:bg-loci-gray-400 disabled:text-loci-gray-200"
             :disabled="savingGitConfig || !gitConfig.repo_url || !gitConfig.branch"
             @click="saveGitConfig"
           >
-            {{ savingGitConfig ? translate('Opslaan...', 'Saving...') : translate('Configuratie opslaan', 'Save configuration') }}
+            {{ savingGitConfig ? translate('Opslaan...', 'Saving...') : translate('Git-config opslaan', 'Save Git config') }}
           </button>
           <button
             type="button"
@@ -263,7 +148,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, reactive, ref, watch } from 'vue';
+import { computed, ref } from 'vue';
 
 definePageMeta({
   middleware: 'auth',
@@ -285,121 +170,6 @@ type StatusState = {
   type: 'success' | 'error' | 'info';
   message: string;
 };
-
-const profileForm = reactive({
-  name: authStore.user?.name || '',
-  email: authStore.user?.email || '',
-});
-
-watch(
-  () => authStore.user,
-  (user) => {
-    if (user) {
-      profileForm.name = user.name;
-      profileForm.email = user.email;
-    }
-  },
-  { immediate: true }
-);
-
-const profileSaving = ref(false);
-const profileSuccess = ref('');
-const profileError = ref('');
-
-async function handleProfileSave() {
-  profileSaving.value = true;
-  profileSuccess.value = '';
-  profileError.value = '';
-
-  try {
-    const response = await authStore.updateProfile({
-      name: profileForm.name,
-      email: profileForm.email,
-    });
-    profileSuccess.value = response.message;
-  } catch (error: any) {
-    profileError.value = extractError(error) || translate('Opslaan van profiel mislukt', 'Failed to save profile');
-  } finally {
-    profileSaving.value = false;
-  }
-}
-
-const emailVerified = computed(() => Boolean(authStore.user?.email_verified_at));
-const resendLoading = ref(false);
-const resendMessage = ref('');
-const resendError = ref('');
-
-async function handleResendVerification() {
-  if (emailVerified.value) {
-    resendMessage.value = translate('Je emailadres is al geverifieerd.', 'Your email address is already verified.');
-    resendError.value = '';
-    return;
-  }
-
-  resendLoading.value = true;
-  resendMessage.value = '';
-  resendError.value = '';
-
-  try {
-    const response = await authStore.resendVerification();
-    resendMessage.value = response.message;
-  } catch (error: any) {
-    resendError.value = extractError(error) || translate('Verificatie email versturen mislukt', 'Failed to send verification email');
-  } finally {
-    resendLoading.value = false;
-  }
-}
-
-const passwordForm = reactive({
-  current_password: '',
-  password: '',
-  password_confirmation: '',
-});
-const passwordSaving = ref(false);
-const passwordSuccess = ref('');
-const passwordError = ref('');
-
-async function handlePasswordChange() {
-  passwordSaving.value = true;
-  passwordSuccess.value = '';
-  passwordError.value = '';
-
-  try {
-    const response = await authStore.changePassword({ ...passwordForm });
-    passwordSuccess.value = response.message;
-    passwordForm.current_password = '';
-    passwordForm.password = '';
-    passwordForm.password_confirmation = '';
-  } catch (error: any) {
-    passwordError.value = extractError(error) || translate('Wijzigen van wachtwoord mislukt', 'Failed to change password');
-  } finally {
-    passwordSaving.value = false;
-  }
-}
-
-const forgotSending = ref(false);
-const forgotMessage = ref('');
-const forgotError = ref('');
-
-async function handleForgotPassword() {
-  if (!authStore.user?.email) {
-    forgotError.value = translate('Geen emailadres gevonden voor dit account.', 'No email address found for this account.');
-    return;
-  }
-
-  forgotSending.value = true;
-  forgotMessage.value = '';
-  forgotError.value = '';
-
-  try {
-    const response = await authStore.forgotPassword(authStore.user.email);
-    forgotMessage.value = response.message;
-  } catch (error: any) {
-    forgotError.value = extractError(error) || translate('Resetlink versturen mislukt', 'Failed to send reset link');
-  } finally {
-    forgotSending.value = false;
-  }
-}
 
 function extractError(error: any): string | undefined {
   if (error?.data?.errors) {
@@ -425,7 +195,7 @@ const hasGitConfig = computed(() => {
   return Boolean(
     gitConfig.value.repo_url &&
       gitConfig.value.branch &&
-      (gitConfig.value.has_access_token || gitConfig.value.access_token)
+      gitConfig.value.has_access_token
   );
 });
 
@@ -469,8 +239,7 @@ async function saveGitConfig() {
     gitConfig.value.has_access_token = response.config.has_access_token ?? Boolean(payload.access_token);
     gitConfig.value.last_pushed_at = response.config.last_pushed_at || gitConfig.value.last_pushed_at;
     gitConfig.value.access_token = '';
-
-    gitStatus.value = { type: 'success', message: translate('Configuratie opgeslagen', 'Configuration saved') };
+    gitStatus.value = { type: 'success', message: translate('Git-configuratie opgeslagen', 'Git configuration saved') };
   } catch (e: any) {
     gitStatus.value = { type: 'error', message: extractError(e) || translate('Opslaan mislukt', 'Save failed') };
   } finally {
@@ -480,7 +249,7 @@ async function saveGitConfig() {
 
 async function syncToGit() {
   if (!hasGitConfig.value) {
-    gitStatus.value = { type: 'error', message: translate('Configureer eerst de git instellingen', 'Configure your Git settings first') };
+    gitStatus.value = { type: 'error', message: translate('De Git-koppeling is nog niet door Aitje ingesteld.', 'The Git connection has not been configured by Aitje yet.') };
     return;
   }
 

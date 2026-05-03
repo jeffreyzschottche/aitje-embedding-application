@@ -145,7 +145,7 @@ class GitSyncService
 
     private function ensureRepoIdentity(string $repoPath): void
     {
-        $email = config('knowledgebase.user.email') ?: 'kennisbank@localhost';
+        $email = config('admin.email') ?: 'kennisbank@localhost';
         $name = 'Kennisbank Sync';
 
         Process::path($repoPath)->run(

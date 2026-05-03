@@ -26,11 +26,14 @@ class KennisbankController extends Controller
         return response()->json(['config' => $config]);
     }
 
-    /**
-     * Store or update git configuration.
-     */
     public function updateGitConfig(Request $request): JsonResponse
     {
+        if ($request->user()->currentAccessToken()?->name !== 'admin_impersonation') {
+            return response()->json([
+                'message' => 'Only admins can update Git configuration.',
+            ], 403);
+        }
+
         $validated = $request->validate([
             'repo_url' => 'required|url',
             'branch' => 'required|string|max:255',
